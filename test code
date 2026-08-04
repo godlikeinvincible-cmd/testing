@@ -5,3 +5,26 @@ local window = library:AddWindow("KHERNA PRIVATE", {
     min_size = Vector2.new(450, 1160),
     can_resize = false,
 })
+
+local introTab = window:AddTab("Introduction")
+
+
+local titleLabel = introTab:AddLabel("Welcome n shit")
+titleLabel.TextSize = 22
+titleLabel.Font = Enum.Font.Bangers        
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local titleLabel = introTab:AddLabel("Made by Invincible & Godlike")
+titleLabel.TextSize = 22
+titleLabel.Font = Enum.Font.Bangers        
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local titleLabel = introTab:AddLabel("dunno what to say")
+titleLabel.TextSize = 22
+titleLabel.Font = Enum.Font.Bangers        
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local titleLabel = introTab:AddLabel("dunno what to say")
+titleLabel.TextSize = 22
+titleLabel.Font = Enum.Font.Bangers        
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
