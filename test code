@@ -3,7 +3,7 @@ local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/godli
 
 local window = library:AddWindow("KHERNA PRIVATE", {
     main_color = Color3.fromRGB(75, 0, 130),
-    min_size = Vector2.new(700, 1160),
+    min_size = Vector2.new(600, 630),
     can_resize = false,
 })
 
