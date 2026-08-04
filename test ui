@@ -2041,4 +2041,4 @@ local highlight_lua = function(type)
 	return window_data, Window
 end
 
-return library
+return library 
