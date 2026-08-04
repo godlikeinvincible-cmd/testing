@@ -28,3 +28,10 @@ local titleLabel = introTab:AddLabel("dunno what to say")
 titleLabel.TextSize = 22
 titleLabel.Font = Enum.Font.Bangers        
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+
+local MainTab = window:AddTab("Main")
+
+local rebirthTab = window:AddTab("Rebirth")
+
+local killerTab = window:AddTab("Killer")
