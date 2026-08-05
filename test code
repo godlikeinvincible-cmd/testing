@@ -7,8 +7,52 @@ local window = library:AddWindow("KHERNA PUBLIC", {
     can_resize = false,
 })
 
-local Intro = window:AddTab("Introduction")
---- Intoductory Stuff
+local introTab = window:AddTab("Introduction")
+
+local Label = introTab:AddLabel("Welcome To Kherna Public")
+
+Label.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+Label.TextSize = 18
+
+local Label = introTab:AddLabel("Developed And Founded By Invincible & Godlike")
+
+Label.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+Label.TextSize = 18
+
+
+local Label = introTab:AddLabel("ect")
+
+Label.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+Label.TextSize = 18
+
+local Label = introTab:AddLabel("ect")
+
+Label.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+Label.TextSize = 18
+
+
+
+
 local mainTab = window:AddTab("Main")
 
 
@@ -144,10 +188,15 @@ local autoPunchNoAnim = false
 local targetDropdownItems = {}
 local availableTargets = {}
 
-local titleLabel = Killer:AddLabel("Select Pack")
-titleLabel.TextSize = 18
-titleLabel.Font = Enum.Font.Bangers 
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+local Label = Killer:AddLabel("select pack")
+
+Label.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+Label.TextSize = 22
 
 local titleLabel = Killer:AddLabel("")
 titleLabel.TextSize = 8
@@ -288,10 +337,15 @@ titleLabel.Font = Enum.Font.Bangers
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 
-local titleLabel = Killer:AddLabel("Targeting ect")
-titleLabel.TextSize = 18
-titleLabel.Font = Enum.Font.Bangers 
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+local Label = Killer:AddLabel("targeting ect")
+
+Label.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+Label.TextSize = 22
 
 local titleLabel = Killer:AddLabel("")
 titleLabel.TextSize = 8
@@ -561,10 +615,15 @@ titleLabel.TextSize = 8
 titleLabel.Font = Enum.Font.Bangers 
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-local titleLabel = Killer:AddLabel("Basic PvP Features")
-titleLabel.TextSize = 18
-titleLabel.Font = Enum.Font.Bangers 
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+local Label = Killer:AddLabel("basic pvp features")
+
+Label.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+Label.TextSize = 22
 
 
 local titleLabel = Killer:AddLabel("")
@@ -1071,6 +1130,745 @@ local rockington = AutoFarm:AddFolder("Rock V1")
 
 
 local rockington2 = AutoFarm:AddFolder("Rock V2")
+
+
+local rockington2 = introTab:AddLabel("Rock Teleports")
+
+Label.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+Label.TextSize = 18
+
+
+
+local targetCFrame = CFrame.new(-7623.2041, 0.895177484, 3006.69409, 0.990648508, 8.82210952e-06, -0.136438847, -1.19864681e-05, 1, -2.2370954e-05, 0.136438847, 2.37971726e-05, 0.990648508)
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local player = Players.LocalPlayer
+local LocalPlayer = player
+
+local enabled = false
+local connection
+local punchThread1
+local punchThread2
+local charAddedConnection
+local diedConnection
+
+local function getRoot()
+    local character = player.Character or player.CharacterAdded:Wait()
+    return character:WaitForChild("HumanoidRootPart")
+end
+
+local function pressKey(keyCode)
+    VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+    task.wait(0.05)
+    VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+end
+
+local function forceEquipPunch()
+    local character = LocalPlayer.Character
+    local backpack = LocalPlayer.Backpack
+    if not character or not backpack then return false end
+
+    local punch = backpack:FindFirstChild("Punch") or character:FindFirstChild("Punch")
+    if punch then
+        if punch.Parent ~= character then
+            punch.Parent = character
+        end
+        local attackTime = punch:FindFirstChild("attackTime")
+        if attackTime then
+            attackTime.Value = 0
+        end
+        return true
+    end
+    return false
+end
+
+local function startAutoPunch()
+    _G.fastHitActive = true
+
+
+    punchThread1 = task.spawn(function()
+        while _G.fastHitActive do
+            forceEquipPunch()
+            task.wait(0.05)
+        end
+    end)
+
+    punchThread2 = task.spawn(function()
+        while _G.fastHitActive do
+            local character = LocalPlayer.Character
+            if character then
+                local punch = character:FindFirstChild("Punch")
+                if punch then
+                    punch:Activate()
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
+
+    local function hookDied(char)
+        local humanoid = char:WaitForChild("Humanoid", 5)
+        if humanoid then
+            if diedConnection then
+                diedConnection:Disconnect()
+            end
+            diedConnection = humanoid.Died:Connect(function() end)
+        end
+    end
+
+    if LocalPlayer.Character then
+        hookDied(LocalPlayer.Character)
+    end
+
+   
+    if charAddedConnection then
+        charAddedConnection:Disconnect()
+    end
+    charAddedConnection = LocalPlayer.CharacterAdded:Connect(function(char)
+        hookDied(char)
+
+        task.spawn(function()
+
+            task.wait(0.4)
+
+            if _G.fastHitActive then
+                pressKey(Enum.KeyCode.One)
+            end
+
+            for i = 1, 40 do
+                if not _G.fastHitActive then break end
+                if forceEquipPunch() then
+                    break
+                end
+                task.wait(0.1)
+            end
+        end)
+    end)
+end
+
+local function stopAutoPunch()
+    _G.fastHitActive = false
+
+    if charAddedConnection then
+        charAddedConnection:Disconnect()
+        charAddedConnection = nil
+    end
+    if diedConnection then
+        diedConnection:Disconnect()
+        diedConnection = nil
+    end
+
+    local character = LocalPlayer.Character
+    if character then
+        local punch = character:FindFirstChild("Punch")
+        if punch then
+            punch.Parent = LocalPlayer.Backpack
+        end
+    end
+end
+
+rockington2:AddSwitch("Red Rock", function(state)
+    enabled = state
+
+    if enabled then
+        pcall(function()
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 12)
+        end)
+
+        if connection then
+            connection:Disconnect()
+        end
+        connection = RunService.Heartbeat:Connect(function()
+            local root = getRoot()
+            if root then
+                root.CFrame = targetCFrame
+                root.AssemblyLinearVelocity = Vector3.zero
+                root.AssemblyAngularVelocity = Vector3.zero
+            end
+        end)
+
+        startAutoPunch()
+    else
+        if connection then
+            connection:Disconnect()
+            connection = nil
+        end
+
+        local root = getRoot()
+        if root then
+            root.AssemblyLinearVelocity = Vector3.zero
+            root.AssemblyAngularVelocity = Vector3.zero
+        end
+
+        pcall(function()
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
+        end)
+
+        stopAutoPunch()
+    end
+end)
+
+
+
+
+
+
+local targetCFrame = CFrame.new(-8975.60352, 5.78957558, -6126.97461, -0.998959959, 3.54010616e-08, -0.04559559, 3.69357736e-08, 1, -3.28166934e-08, 0.04559559, -3.44666695e-08, -0.998959959)
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local player = Players.LocalPlayer
+local LocalPlayer = player
+
+local enabled = false
+local connection
+local punchThread1
+local punchThread2
+local charAddedConnection
+local diedConnection
+
+local function getRoot()
+    local character = player.Character or player.CharacterAdded:Wait()
+    return character:WaitForChild("HumanoidRootPart")
+end
+
+local function pressKey(keyCode)
+    VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+    task.wait(0.05)
+    VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+end
+
+local function forceEquipPunch()
+    local character = LocalPlayer.Character
+    local backpack = LocalPlayer.Backpack
+    if not character or not backpack then return false end
+
+    local punch = backpack:FindFirstChild("Punch") or character:FindFirstChild("Punch")
+    if punch then
+        if punch.Parent ~= character then
+            punch.Parent = character
+        end
+        local attackTime = punch:FindFirstChild("attackTime")
+        if attackTime then
+            attackTime.Value = 0
+        end
+        return true
+    end
+    return false
+end
+
+local function startAutoPunch()
+    _G.fastHitActive = true
+
+
+    punchThread1 = task.spawn(function()
+        while _G.fastHitActive do
+            forceEquipPunch()
+            task.wait(0.05)
+        end
+    end)
+
+    punchThread2 = task.spawn(function()
+        while _G.fastHitActive do
+            local character = LocalPlayer.Character
+            if character then
+                local punch = character:FindFirstChild("Punch")
+                if punch then
+                    punch:Activate()
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
+
+    local function hookDied(char)
+        local humanoid = char:WaitForChild("Humanoid", 5)
+        if humanoid then
+            if diedConnection then
+                diedConnection:Disconnect()
+            end
+            diedConnection = humanoid.Died:Connect(function() end)
+        end
+    end
+
+    if LocalPlayer.Character then
+        hookDied(LocalPlayer.Character)
+    end
+
+   
+    if charAddedConnection then
+        charAddedConnection:Disconnect()
+    end
+    charAddedConnection = LocalPlayer.CharacterAdded:Connect(function(char)
+        hookDied(char)
+
+        task.spawn(function()
+
+            task.wait(0.4)
+
+            if _G.fastHitActive then
+                pressKey(Enum.KeyCode.One)
+            end
+
+            for i = 1, 40 do
+                if not _G.fastHitActive then break end
+                if forceEquipPunch() then
+                    break
+                end
+                task.wait(0.1)
+            end
+        end)
+    end)
+end
+
+local function stopAutoPunch()
+    _G.fastHitActive = false
+
+    if charAddedConnection then
+        charAddedConnection:Disconnect()
+        charAddedConnection = nil
+    end
+    if diedConnection then
+        diedConnection:Disconnect()
+        diedConnection = nil
+    end
+
+    local character = LocalPlayer.Character
+    if character then
+        local punch = character:FindFirstChild("Punch")
+        if punch then
+            punch.Parent = LocalPlayer.Backpack
+        end
+    end
+end
+
+rockington2:AddSwitch("Green Rock", function(state)
+    enabled = state
+
+    if enabled then
+        pcall(function()
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 12)
+        end)
+
+        if connection then
+            connection:Disconnect()
+        end
+        connection = RunService.Heartbeat:Connect(function()
+            local root = getRoot()
+            if root then
+                root.CFrame = targetCFrame
+                root.AssemblyLinearVelocity = Vector3.zero
+                root.AssemblyAngularVelocity = Vector3.zero
+            end
+        end)
+
+        startAutoPunch()
+    else
+        if connection then
+            connection:Disconnect()
+            connection = nil
+        end
+
+        local root = getRoot()
+        if root then
+            root.AssemblyLinearVelocity = Vector3.zero
+            root.AssemblyAngularVelocity = Vector3.zero
+        end
+
+        pcall(function()
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
+        end)
+
+        stopAutoPunch()
+    end
+end)
+
+
+
+
+
+
+
+
+
+local targetCFrame = CFrame.new(4185.32617, 988.227356, -4064.68701, 0.514073431, 0.00712418742, 0.85771656, 0.000468793703, 0.999963045, -0.00858665723, -0.857746065, 0.00481626485, 0.51405108)
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local player = Players.LocalPlayer
+local LocalPlayer = player
+
+local enabled = false
+local connection
+local punchThread1
+local punchThread2
+local charAddedConnection
+local diedConnection
+
+local function getRoot()
+    local character = player.Character or player.CharacterAdded:Wait()
+    return character:WaitForChild("HumanoidRootPart")
+end
+
+local function pressKey(keyCode)
+    VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+    task.wait(0.05)
+    VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+end
+
+local function forceEquipPunch()
+    local character = LocalPlayer.Character
+    local backpack = LocalPlayer.Backpack
+    if not character or not backpack then return false end
+
+    local punch = backpack:FindFirstChild("Punch") or character:FindFirstChild("Punch")
+    if punch then
+        if punch.Parent ~= character then
+            punch.Parent = character
+        end
+        local attackTime = punch:FindFirstChild("attackTime")
+        if attackTime then
+            attackTime.Value = 0
+        end
+        return true
+    end
+    return false
+end
+
+local function startAutoPunch()
+    _G.fastHitActive = true
+
+
+    punchThread1 = task.spawn(function()
+        while _G.fastHitActive do
+            forceEquipPunch()
+            task.wait(0.05)
+        end
+    end)
+
+    punchThread2 = task.spawn(function()
+        while _G.fastHitActive do
+            local character = LocalPlayer.Character
+            if character then
+                local punch = character:FindFirstChild("Punch")
+                if punch then
+                    punch:Activate()
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
+
+    local function hookDied(char)
+        local humanoid = char:WaitForChild("Humanoid", 5)
+        if humanoid then
+            if diedConnection then
+                diedConnection:Disconnect()
+            end
+            diedConnection = humanoid.Died:Connect(function() end)
+        end
+    end
+
+    if LocalPlayer.Character then
+        hookDied(LocalPlayer.Character)
+    end
+
+   
+    if charAddedConnection then
+        charAddedConnection:Disconnect()
+    end
+    charAddedConnection = LocalPlayer.CharacterAdded:Connect(function(char)
+        hookDied(char)
+
+        task.spawn(function()
+
+            task.wait(0.4)
+
+            if _G.fastHitActive then
+                pressKey(Enum.KeyCode.One)
+            end
+
+            for i = 1, 40 do
+                if not _G.fastHitActive then break end
+                if forceEquipPunch() then
+                    break
+                end
+                task.wait(0.1)
+            end
+        end)
+    end)
+end
+
+local function stopAutoPunch()
+    _G.fastHitActive = false
+
+    if charAddedConnection then
+        charAddedConnection:Disconnect()
+        charAddedConnection = nil
+    end
+    if diedConnection then
+        diedConnection:Disconnect()
+        diedConnection = nil
+    end
+
+    local character = LocalPlayer.Character
+    if character then
+        local punch = character:FindFirstChild("Punch")
+        if punch then
+            punch.Parent = LocalPlayer.Backpack
+        end
+    end
+end
+
+rockington2:AddSwitch("White Rock", function(state)
+    enabled = state
+
+    if enabled then
+        pcall(function()
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 12)
+        end)
+
+        if connection then
+            connection:Disconnect()
+        end
+        connection = RunService.Heartbeat:Connect(function()
+            local root = getRoot()
+            if root then
+                root.CFrame = targetCFrame
+                root.AssemblyLinearVelocity = Vector3.zero
+                root.AssemblyAngularVelocity = Vector3.zero
+            end
+        end)
+
+        startAutoPunch()
+    else
+        if connection then
+            connection:Disconnect()
+            connection = nil
+        end
+
+        local root = getRoot()
+        if root then
+            root.AssemblyLinearVelocity = Vector3.zero
+            root.AssemblyAngularVelocity = Vector3.zero
+        end
+
+        pcall(function()
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
+        end)
+
+        stopAutoPunch()
+    end
+end)
+
+
+
+
+
+
+
+
+
+
+local targetCFrame = CFrame.new(-7227.2124, 4.22266006, -1268.93872, -0.351789951, -1.93498781e-08, 0.936078966, 1.47858668e-08, 1, 2.62279123e-08, -0.936078966, 2.30674555e-08, -0.351789951)
+
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local player = Players.LocalPlayer
+local LocalPlayer = player
+
+local enabled = false
+local connection
+local punchThread1
+local punchThread2
+local charAddedConnection
+local diedConnection
+
+local function getRoot()
+    local character = player.Character or player.CharacterAdded:Wait()
+    return character:WaitForChild("HumanoidRootPart")
+end
+
+local function pressKey(keyCode)
+    VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+    task.wait(0.05)
+    VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+end
+
+local function forceEquipPunch()
+    local character = LocalPlayer.Character
+    local backpack = LocalPlayer.Backpack
+    if not character or not backpack then return false end
+
+    local punch = backpack:FindFirstChild("Punch") or character:FindFirstChild("Punch")
+    if punch then
+        if punch.Parent ~= character then
+            punch.Parent = character
+        end
+        local attackTime = punch:FindFirstChild("attackTime")
+        if attackTime then
+            attackTime.Value = 0
+        end
+        return true
+    end
+    return false
+end
+
+local function startAutoPunch()
+    _G.fastHitActive = true
+
+
+    punchThread1 = task.spawn(function()
+        while _G.fastHitActive do
+            forceEquipPunch()
+            task.wait(0.05)
+        end
+    end)
+
+    punchThread2 = task.spawn(function()
+        while _G.fastHitActive do
+            local character = LocalPlayer.Character
+            if character then
+                local punch = character:FindFirstChild("Punch")
+                if punch then
+                    punch:Activate()
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
+
+    local function hookDied(char)
+        local humanoid = char:WaitForChild("Humanoid", 5)
+        if humanoid then
+            if diedConnection then
+                diedConnection:Disconnect()
+            end
+            diedConnection = humanoid.Died:Connect(function() end)
+        end
+    end
+
+    if LocalPlayer.Character then
+        hookDied(LocalPlayer.Character)
+    end
+
+   
+    if charAddedConnection then
+        charAddedConnection:Disconnect()
+    end
+    charAddedConnection = LocalPlayer.CharacterAdded:Connect(function(char)
+        hookDied(char)
+
+        task.spawn(function()
+
+            task.wait(0.4)
+
+            if _G.fastHitActive then
+                pressKey(Enum.KeyCode.One)
+            end
+
+            for i = 1, 40 do
+                if not _G.fastHitActive then break end
+                if forceEquipPunch() then
+                    break
+                end
+                task.wait(0.1)
+            end
+        end)
+    end)
+end
+
+local function stopAutoPunch()
+    _G.fastHitActive = false
+
+    if charAddedConnection then
+        charAddedConnection:Disconnect()
+        charAddedConnection = nil
+    end
+    if diedConnection then
+        diedConnection:Disconnect()
+        diedConnection = nil
+    end
+
+    local character = LocalPlayer.Character
+    if character then
+        local punch = character:FindFirstChild("Punch")
+        if punch then
+            punch.Parent = LocalPlayer.Backpack
+        end
+    end
+end
+
+rockington2:AddSwitch("Orange Rock", function(state)
+    enabled = state
+
+    if enabled then
+        pcall(function()
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 8)
+        end)
+
+        if connection then
+            connection:Disconnect()
+        end
+        connection = RunService.Heartbeat:Connect(function()
+            local root = getRoot()
+            if root then
+                root.CFrame = targetCFrame
+                root.AssemblyLinearVelocity = Vector3.zero
+                root.AssemblyAngularVelocity = Vector3.zero
+            end
+        end)
+
+        startAutoPunch()
+    else
+        if connection then
+            connection:Disconnect()
+            connection = nil
+        end
+
+        local root = getRoot()
+        if root then
+            root.AssemblyLinearVelocity = Vector3.zero
+            root.AssemblyAngularVelocity = Vector3.zero
+        end
+
+        pcall(function()
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
+        end)
+
+        stopAutoPunch()
+    end
+end)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 local Inventory = window:AddTab("Inventory")
