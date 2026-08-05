@@ -55,7 +55,323 @@ Label.TextSize = 18
 
 local mainTab = window:AddTab("Main")
 
+local Label = mainTab:AddLabel("User Settings ⚙️")
 
+Label.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+Label.TextSize = 20
+
+local Label = mainTab:AddLabel("")
+
+Label.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+Label.TextSize = 2
+
+mainTab:AddTextBox("Set Speed", function(value)
+    local selectedSpeed = value
+ 
+    _G.AutoSpeed = true
+ 
+    if _G.AutoSpeed then
+        if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = tonumber(selectedSpeed)
+        end
+    end
+end)
+ 
+mainTab:AddTextBox("Set Size", function(value)
+    local selectedSize = value
+ 
+    _G.AutoSize = true
+ 
+    if _G.AutoSize then
+        game:GetService("ReplicatedStorage").rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", tonumber(selectedSize))
+    end
+end)
+
+local Label = mainTab:AddLabel("")
+
+Label.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+Label.TextSize = 2
+
+
+local Label = mainTab:AddLabel("Other Features")
+
+Label.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+Label.TextSize = 20
+
+
+
+local Label = mainTab:AddLabel("")
+
+Label.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+Label.TextSize = 2
+
+
+
+
+local antiKnockbackSwitch = mainTab:AddSwitch("Anti Fling", function(bool)
+    if bool then
+        local playerName = game.Players.LocalPlayer.Name
+        local character = game.Workspace:FindFirstChild(playerName)
+        if character then
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                local bodyVelocity = Instance.new("BodyVelocity")
+                bodyVelocity.MaxForce = Vector3.new(100000, 0, 100000)
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                bodyVelocity.P = 1250
+                bodyVelocity.Parent = rootPart
+            end
+        end
+    else
+        local playerName = game.Players.LocalPlayer.Name
+        local character = game.Workspace:FindFirstChild(playerName)
+        if character then
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                local existingVelocity = rootPart:FindFirstChild("BodyVelocity")
+                if existingVelocity and existingVelocity.MaxForce == Vector3.new(100000, 0, 100000) then
+                    existingVelocity:Destroy()
+                end
+            end
+        end
+    end
+end)
+antiKnockbackSwitch:Set(true)
+
+
+
+
+
+
+
+local InfiniteJump = false
+
+mainTab:AddSwitch("Infinite Jump", function(Value)
+    InfiniteJump = Value
+end)
+
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+UserInputService.JumpRequest:Connect(function()
+    if InfiniteJump then
+        local character = LocalPlayer.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end
+    end
+end)
+
+
+mainTab:AddSwitch("Hide Frames", function(bool)
+    local rSto = game:GetService("ReplicatedStorage")
+    for _, obj in pairs(rSto:GetChildren()) do
+        if obj.Name:match("Frame$") then
+            obj.Visible = not bool
+        end
+    end
+end)
+
+
+
+
+
+
+
+
+
+
+
+
+local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local original = {
+    Brightness = Lighting.Brightness,
+    ClockTime = Lighting.ClockTime,
+    OutdoorAmbient = Lighting.OutdoorAmbient,
+    Ambient = Lighting.Ambient,
+    FogColor = Lighting.FogColor,
+    FogEnd = Lighting.FogEnd
+}
+
+local enabled = false
+
+local function enableOptimization()
+    for _, v in pairs(Lighting:GetChildren()) do
+        if v:IsA("Sky") then
+            v:Destroy()
+        end
+    end
+
+    local darkSky = Instance.new("Sky")
+    darkSky.Name = "DarkSky"
+    darkSky.SkyboxBk = "rbxassetid://0"
+    darkSky.SkyboxDn = "rbxassetid://0"
+    darkSky.SkyboxFt = "rbxassetid://0"
+    darkSky.SkyboxLf = "rbxassetid://0"
+    darkSky.SkyboxRt = "rbxassetid://0"
+    darkSky.SkyboxUp = "rbxassetid://0"
+    darkSky.Parent = Lighting
+
+    Lighting.Brightness = 0
+    Lighting.ClockTime = 0
+    Lighting.OutdoorAmbient = Color3.new(0,0,0)
+    Lighting.Ambient = Color3.new(0,0,0)
+    Lighting.FogColor = Color3.new(0,0,0)
+    Lighting.FogEnd = 0
+end
+
+local function disableOptimization()
+
+    for k, v in pairs(original) do
+        Lighting[k] = v
+    end
+
+    local sky = Lighting:FindFirstChild("DarkSky")
+    if sky then
+        sky:Destroy()
+    end
+end
+
+mainTab:AddSwitch("Anti Lag", function(state)
+    enabled = state
+
+    if state then
+        enableOptimization()
+    else
+        disableOptimization()
+    end
+end)
+
+local switch = mainTab:AddSwitch("Lock Position", function(Value)
+    if Value then
+        -- Lock Position
+        local currentPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+        getgenv().posLock = game:GetService("RunService").Heartbeat:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = currentPos
+            end
+        end)
+    else
+        -- Unlock Position
+        if getgenv().posLock then
+            getgenv().posLock:Disconnect()
+            getgenv().posLock = nil
+        end
+    end
+end)
+
+
+
+
+local parts = {}
+local partSize = 2048
+local totalDistance = 50000
+local startPosition = Vector3.new(-2, -9.5, -2)
+local numberOfParts = math.ceil(totalDistance / partSize)
+
+local function createParts()
+    for x = 0, numberOfParts - 1 do
+        for z = 0, numberOfParts - 1 do
+            local newPartSide = Instance.new("Part")
+            newPartSide.Size = Vector3.new(partSize, 1, partSize)
+            newPartSide.Position = startPosition + Vector3.new(x * partSize, 0, z * partSize)
+            newPartSide.Anchored = true
+            newPartSide.Transparency = 1
+            newPartSide.CanCollide = true
+            newPartSide.Name = "Part_Side_" .. x .. "_" .. z
+            newPartSide.Parent = workspace
+            table.insert(parts, newPartSide)
+           
+            local newPartLeftRight = Instance.new("Part")
+            newPartLeftRight.Size = Vector3.new(partSize, 1, partSize)
+            newPartLeftRight.Position = startPosition + Vector3.new(-x * partSize, 0, z * partSize)
+            newPartLeftRight.Anchored = true
+            newPartLeftRight.Transparency = 1
+            newPartLeftRight.CanCollide = true
+            newPartLeftRight.Name = "Part_LeftRight_" .. x .. "_" .. z
+            newPartLeftRight.Parent = workspace
+            table.insert(parts, newPartLeftRight)
+           
+            local newPartUpLeft = Instance.new("Part")
+            newPartUpLeft.Size = Vector3.new(partSize, 1, partSize)
+            newPartUpLeft.Position = startPosition + Vector3.new(-x * partSize, 0, -z * partSize)
+            newPartUpLeft.Anchored = true
+            newPartUpLeft.Transparency = 1
+            newPartUpLeft.CanCollide = true
+            newPartUpLeft.Name = "Part_UpLeft_" .. x .. "_" .. z
+            newPartUpLeft.Parent = workspace
+            table.insert(parts, newPartUpLeft)
+           
+            local newPartUpRight = Instance.new("Part")
+            newPartUpRight.Size = Vector3.new(partSize, 1, partSize)
+            newPartUpRight.Position = startPosition + Vector3.new(x * partSize, 0, -z * partSize)
+            newPartUpRight.Anchored = true
+            newPartUpRight.Transparency = 1
+            newPartUpRight.CanCollide = true
+            newPartUpRight.Name = "Part_UpRight_" .. x .. "_" .. z
+            newPartUpRight.Parent = workspace
+            table.insert(parts, newPartUpRight)
+        end
+    end
+end
+
+local function makePartsWalkthrough()
+    for _, part in ipairs(parts) do
+        if part and part.Parent then
+            part.CanCollide = false
+        end
+    end
+end
+
+local function makePartsSolid()
+    for _, part in ipairs(parts) do
+        if part and part.Parent then
+            part.CanCollide = true
+        end
+    end
+end
+
+local freezeSwitch = mainTab:AddSwitch("Freeze Water", function(bool)
+    if bool then
+        createParts()
+    else
+        makePartsWalkthrough()
+    end
+end)
+
+freezeSwitch:Set(true)
 
 
 local Killer = window:AddTab("Killer")
