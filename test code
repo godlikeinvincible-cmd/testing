@@ -52,8 +52,25 @@ Label.TextSize = 18
 
 
 introTab:AddButton("Support us ❤️", function()
-    openlink("https://youtube.com/@khernahub?si=2mLhR1zhNMPZhPDm")
+    setclipboard("https://youtube.com/@khernahub?si=2mLhR1zhNMPZhPDm")
+    
+    if Library and Library.Notify then
+        Library:Notify("YouTube link copied to clipboard!", 3)
+    elseif Fluent then
+        Fluent:Notify({
+            Title = "Copied!",
+            Content = "YouTube link copied to clipboard",
+            Duration = 3
+        })
+    else
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Copied!",
+            Text = "YouTube link copied to clipboard",
+            Duration = 3
+        })
+    end
 end)
+
 
 
 
