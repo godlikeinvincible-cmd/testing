@@ -51,6 +51,11 @@ Label.FontFace = Font.new(
 Label.TextSize = 18
 
 
+introTab:AddButton("Support us ❤️", function()
+    openlink("https://youtube.com/@khernahub?si=2mLhR1zhNMPZhPDm")
+end)
+
+
 
 
 local mainTab = window:AddTab("Main")
@@ -494,6 +499,55 @@ Killer:AddSwitch("Auto Bad Karma", function(bool)
         end
     end)
 end)
+
+
+Killer:AddSwitch("Auto Kill", function(bool)
+    autoKill = bool
+
+    task.spawn(function()
+        while autoKill do
+            local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+            local rightHand = character:FindFirstChild("RightHand")
+            local leftHand = character:FindFirstChild("LeftHand")
+
+            local punch = LocalPlayer.Backpack:FindFirstChild("Punch")
+            if punch and not character:FindFirstChild("Punch") then
+                punch.Parent = character
+            end
+
+            if rightHand and leftHand then
+                for _, target in ipairs(Players:GetPlayers()) do
+                    if target ~= LocalPlayer and target.Character then
+                        local isWhitelisted = false
+                        for _, name in ipairs(_G.whitelistedPlayers) do
+                            if name:lower() == target.Name:lower() then
+                                isWhitelisted = true
+                                break
+                            end
+                        end
+
+                        if not isWhitelisted then
+                            local rootPart = target.Character:FindFirstChild("HumanoidRootPart")
+                            local humanoid = target.Character:FindFirstChild("Humanoid")
+                            if rootPart and humanoid and humanoid.Health > 0 then
+                                pcall(function()
+                                    firetouchinterest(rightHand, rootPart, 1)
+                                    firetouchinterest(leftHand, rootPart, 1)
+                                    firetouchinterest(rightHand, rootPart, 0)
+                                    firetouchinterest(leftHand, rootPart, 0)
+                                end)
+                            end
+                        end
+                    end
+                end
+            end
+
+            task.wait(0.05)
+        end
+    end)
+end)
+
+
 
 
 local Players = game:GetService("Players")
