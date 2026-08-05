@@ -1132,7 +1132,7 @@ local rockington = AutoFarm:AddFolder("Rock V1")
 local rockington2 = AutoFarm:AddFolder("Rock V2")
 
 
-local rockington2 = introTab:AddLabel("Rock Teleports")
+local Label = rockington2:AddLabel("Rock Teleports")
 
 Label.FontFace = Font.new(
     "rbxasset://fonts/families/PermanentMarker.json",
