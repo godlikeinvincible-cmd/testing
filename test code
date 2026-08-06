@@ -368,8 +368,12 @@ local autoKill = false
 local killTarget = false
 local spying = false
 local autoPunchNoAnim = false
+local autoEquipPunch = false
+local godDamageActive = false
 local targetDropdownItems = {}
 local availableTargets = {}
+
+_G.whitelistedPlayers = _G.whitelistedPlayers or {}
 
 local Label = Killer:AddLabel("select pack")
 
@@ -611,8 +615,6 @@ titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
-_G.whitelistedPlayers = _G.whitelistedPlayers or {}
-
 local whitelistDropdownItems = {}
 local selectedWhitelist = nil
 
@@ -773,28 +775,27 @@ Killer:AddSwitch("Kill Target", function(state)
 
                 if not (rightHand and leftHand) then
                     task.wait(0.1)
-                    continue
-                end
+                else
+                    if punch then
+                        pcall(function()
+                            LocalPlayer.muscleEvent:FireServer("punch", "rightHand")
+                            LocalPlayer.muscleEvent:FireServer("punch", "leftHand")
+                        end)
+                    end
 
-                if punch then
-                    pcall(function()
-                        LocalPlayer.muscleEvent:FireServer("punch", "rightHand")
-                        LocalPlayer.muscleEvent:FireServer("punch", "leftHand")
-                    end)
-                end
-
-                for _, name in ipairs(targetPlayerNames) do
-                    local target = Players:FindFirstChild(name)
-                    if target and target ~= LocalPlayer and target.Character then
-                        local root = target.Character:FindFirstChild("HumanoidRootPart")
-                        local hum = target.Character:FindFirstChild("Humanoid")
-                        if root and hum and hum.Health > 0 then
-                            pcall(function()
-                                firetouchinterest(rightHand, root, 1)
-                                firetouchinterest(leftHand, root, 1)
-                                firetouchinterest(rightHand, root, 0)
-                                firetouchinterest(leftHand, root, 0)
-                            end)
+                    for _, name in ipairs(targetPlayerNames) do
+                        local target = Players:FindFirstChild(name)
+                        if target and target ~= LocalPlayer and target.Character then
+                            local root = target.Character:FindFirstChild("HumanoidRootPart")
+                            local hum = target.Character:FindFirstChild("Humanoid")
+                            if root and hum and hum.Health > 0 then
+                                pcall(function()
+                                    firetouchinterest(rightHand, root, 1)
+                                    firetouchinterest(leftHand, root, 1)
+                                    firetouchinterest(rightHand, root, 0)
+                                    firetouchinterest(leftHand, root, 0)
+                                end)
+                            end
                         end
                     end
                 end
@@ -890,6 +891,40 @@ local button = Killer:AddButton("Remove Punch Animation", function()
         ["rbxassetid://3638767427"] = true,
     }
 
+    local function processTool(tool)
+        if tool and (tool.Name == "Punch" or tool.Name:match("Attack") or tool.Name:match("Right")) then
+            if not tool:GetAttribute("ActivatedOverride") then
+                tool:SetAttribute("ActivatedOverride", true)
+
+                local connection = tool.Activated:Connect(function()
+                    task.wait(0.05)
+
+                    local char = game.Players.LocalPlayer.Character
+                    if char and char:FindFirstChild("Humanoid") then
+                        for _, track in pairs(char.Humanoid:GetPlayingAnimationTracks()) do
+                            if track.Animation then
+                                local animId = track.Animation.AnimationId
+                                local animName = track.Name:lower()
+
+                                if blockedAnimations[animId] or
+                                    animName:match("punch") or
+                                    animName:match("attack") or
+                                    animName:match("right") then
+                                    track:Stop()
+                                end
+                            end
+                        end
+                    end
+                end)
+
+                if not _G.ToolConnections then
+                    _G.ToolConnections = {}
+                end
+                _G.ToolConnections[tool] = connection
+            end
+        end
+    end
+
     local function setupAnimationBlocking()
         local char = game.Players.LocalPlayer.Character
         if not char or not char:FindFirstChild("Humanoid") then return end
@@ -932,40 +967,6 @@ local button = Killer:AddButton("Remove Punch Animation", function()
     setupAnimationBlocking()
 
     local function overrideToolActivation()
-        local function processTool(tool)
-            if tool and (tool.Name == "Punch" or tool.Name:match("Attack") or tool.Name:match("Right")) then
-                if not tool:GetAttribute("ActivatedOverride") then
-                    tool:SetAttribute("ActivatedOverride", true)
-
-                    local connection = tool.Activated:Connect(function()
-                        task.wait(0.05)
-
-                        local char = game.Players.LocalPlayer.Character
-                        if char and char:FindFirstChild("Humanoid") then
-                            for _, track in pairs(char.Humanoid:GetPlayingAnimationTracks()) do
-                                if track.Animation then
-                                    local animId = track.Animation.AnimationId
-                                    local animName = track.Name:lower()
-
-                                    if blockedAnimations[animId] or
-                                        animName:match("punch") or
-                                        animName:match("attack") or
-                                        animName:match("right") then
-                                        track:Stop()
-                                    end
-                                end
-                            end
-                        end
-                    end)
-
-                    if not _G.ToolConnections then
-                        _G.ToolConnections = {}
-                    end
-                    _G.ToolConnections[tool] = connection
-                end
-            end
-        end
-
         for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
             processTool(tool)
         end
@@ -1109,17 +1110,16 @@ Killer:AddSwitch("Auto Punch [Block animation]", function(state)
 						end
 					end
 					task.wait(0.05)
-					continue
-				end
+				else
+					if punch.Parent ~= char then
+						punch.Parent = char
+					end
 
-				if punch.Parent ~= char then
-					punch.Parent = char
+					pcall(function()
+						LocalPlayer.muscleEvent:FireServer("punch", "rightHand")
+						LocalPlayer.muscleEvent:FireServer("punch", "leftHand")
+					end)
 				end
-
-				pcall(function()
-					LocalPlayer.muscleEvent:FireServer("punch", "rightHand")
-					LocalPlayer.muscleEvent:FireServer("punch", "leftHand")
-				end)
 
 				task.wait(0.03)
 			end
@@ -1715,7 +1715,7 @@ local function stopAutoPunch()
     end
 end
 
-rockington2:AddSwitch("Red Rock", function(state)
+rockington2:AddSwitch("Inferno Rock", function(state)
     enabled = state
 
     if enabled then
@@ -1892,7 +1892,7 @@ local function stopAutoPunch()
     end
 end
 
-rockington2:AddSwitch("Green Rock", function(state)
+rockington2:AddSwitch("Muscle King Rock", function(state)
     enabled = state
 
     if enabled then
@@ -2065,7 +2065,7 @@ local function stopAutoPunch()
     end
 end
 
-rockington2:AddSwitch("White Rock", function(state)
+rockington2:AddSwitch("Legends Rock", function(state)
     enabled = state
 
     if enabled then
@@ -2239,7 +2239,7 @@ local function stopAutoPunch()
     end
 end
 
-rockington2:AddSwitch("Orange Rock", function(state)
+rockington2:AddSwitch("Jungle Rock", function(state)
     enabled = state
 
     if enabled then
@@ -2368,7 +2368,226 @@ rockington:AddSwitch("Frozen Rock", function(state)
     end
 end)
 
-        
+rockington:AddSwitch("Mystic Rock", function(state)
+    if state then
+        local function gettool()
+            local player = game:GetService("Players").LocalPlayer
+            for _, v in pairs(player.Backpack:GetChildren()) do
+                if v.Name == "Punch" and player.Character and player.Character:FindFirstChild("Humanoid") then
+                    player.Character.Humanoid:EquipTool(v)
+                end
+            end
+            if player:FindFirstChild("muscleEvent") then
+                player.muscleEvent:FireServer("punch", "leftHand")
+                player.muscleEvent:FireServer("punch", "rightHand")
+            end
+        end
+
+        local requiredDurability = 400000
+        getgenv().RockFarmRunning = true
+
+        task.spawn(function()
+            local player = game:GetService("Players").LocalPlayer
+
+            while getgenv().RockFarmRunning do
+                task.wait()
+                if player:FindFirstChild("Durability") and player.Durability.Value >= requiredDurability then
+                    for _, v in pairs(workspace.machinesFolder:GetDescendants()) do
+                        if v.Name == "neededDurability" and v.Value == requiredDurability then
+                            local rock = v.Parent and v.Parent:FindFirstChild("Rock")
+                            if rock and player.Character and player.Character:FindFirstChild("LeftHand") and player.Character:FindFirstChild("RightHand") then
+                                firetouchinterest(rock, player.Character.RightHand, 0)
+                                firetouchinterest(rock, player.Character.RightHand, 1)
+                                firetouchinterest(rock, player.Character.LeftHand, 0)
+                                firetouchinterest(rock, player.Character.LeftHand, 1)
+                                gettool()
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    else
+        getgenv().RockFarmRunning = false
+    end
+end)
+
+rockington:AddSwitch("Inferno Rock", function(state)
+    if state then
+        local function gettool()
+            local player = game:GetService("Players").LocalPlayer
+            for _, v in pairs(player.Backpack:GetChildren()) do
+                if v.Name == "Punch" and player.Character and player.Character:FindFirstChild("Humanoid") then
+                    player.Character.Humanoid:EquipTool(v)
+                end
+            end
+            if player:FindFirstChild("muscleEvent") then
+                player.muscleEvent:FireServer("punch", "leftHand")
+                player.muscleEvent:FireServer("punch", "rightHand")
+            end
+        end
+
+        local requiredDurability = 750000
+        getgenv().RockFarmRunning = true
+
+        task.spawn(function()
+            local player = game:GetService("Players").LocalPlayer
+
+            while getgenv().RockFarmRunning do
+                task.wait()
+                if player:FindFirstChild("Durability") and player.Durability.Value >= requiredDurability then
+                    for _, v in pairs(workspace.machinesFolder:GetDescendants()) do
+                        if v.Name == "neededDurability" and v.Value == requiredDurability then
+                            local rock = v.Parent and v.Parent:FindFirstChild("Rock")
+                            if rock and player.Character and player.Character:FindFirstChild("LeftHand") and player.Character:FindFirstChild("RightHand") then
+                                firetouchinterest(rock, player.Character.RightHand, 0)
+                                firetouchinterest(rock, player.Character.RightHand, 1)
+                                firetouchinterest(rock, player.Character.LeftHand, 0)
+                                firetouchinterest(rock, player.Character.LeftHand, 1)
+                                gettool()
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    else
+        getgenv().RockFarmRunning = false
+    end
+end)
+
+rockington:AddSwitch("Legends Rock", function(state)
+    if state then
+        local function gettool()
+            local player = game:GetService("Players").LocalPlayer
+            for _, v in pairs(player.Backpack:GetChildren()) do
+                if v.Name == "Punch" and player.Character and player.Character:FindFirstChild("Humanoid") then
+                    player.Character.Humanoid:EquipTool(v)
+                end
+            end
+            if player:FindFirstChild("muscleEvent") then
+                player.muscleEvent:FireServer("punch", "leftHand")
+                player.muscleEvent:FireServer("punch", "rightHand")
+            end
+        end
+
+        local requiredDurability = 1000000
+        getgenv().RockFarmRunning = true
+
+        task.spawn(function()
+            local player = game:GetService("Players").LocalPlayer
+
+            while getgenv().RockFarmRunning do
+                task.wait()
+                if player:FindFirstChild("Durability") and player.Durability.Value >= requiredDurability then
+                    for _, v in pairs(workspace.machinesFolder:GetDescendants()) do
+                        if v.Name == "neededDurability" and v.Value == requiredDurability then
+                            local rock = v.Parent and v.Parent:FindFirstChild("Rock")
+                            if rock and player.Character and player.Character:FindFirstChild("LeftHand") and player.Character:FindFirstChild("RightHand") then
+                                firetouchinterest(rock, player.Character.RightHand, 0)
+                                firetouchinterest(rock, player.Character.RightHand, 1)
+                                firetouchinterest(rock, player.Character.LeftHand, 0)
+                                firetouchinterest(rock, player.Character.LeftHand, 1)
+                                gettool()
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    else
+        getgenv().RockFarmRunning = false
+    end
+end)
+
+rockington:AddSwitch("Muscle King Rock", function(state)
+    if state then
+        local function gettool()
+            local player = game:GetService("Players").LocalPlayer
+            for _, v in pairs(player.Backpack:GetChildren()) do
+                if v.Name == "Punch" and player.Character and player.Character:FindFirstChild("Humanoid") then
+                    player.Character.Humanoid:EquipTool(v)
+                end
+            end
+            if player:FindFirstChild("muscleEvent") then
+                player.muscleEvent:FireServer("punch", "leftHand")
+                player.muscleEvent:FireServer("punch", "rightHand")
+            end
+        end
+
+        local requiredDurability = 5000000
+        getgenv().RockFarmRunning = true
+
+        task.spawn(function()
+            local player = game:GetService("Players").LocalPlayer
+
+            while getgenv().RockFarmRunning do
+                task.wait()
+                if player:FindFirstChild("Durability") and player.Durability.Value >= requiredDurability then
+                    for _, v in pairs(workspace.machinesFolder:GetDescendants()) do
+                        if v.Name == "neededDurability" and v.Value == requiredDurability then
+                            local rock = v.Parent and v.Parent:FindFirstChild("Rock")
+                            if rock and player.Character and player.Character:FindFirstChild("LeftHand") and player.Character:FindFirstChild("RightHand") then
+                                firetouchinterest(rock, player.Character.RightHand, 0)
+                                firetouchinterest(rock, player.Character.RightHand, 1)
+                                firetouchinterest(rock, player.Character.LeftHand, 0)
+                                firetouchinterest(rock, player.Character.LeftHand, 1)
+                                gettool()
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    else
+        getgenv().RockFarmRunning = false
+    end
+end)
+
+rockington:AddSwitch("Jungle Rock", function(state)
+    if state then
+        local function gettool()
+            local player = game:GetService("Players").LocalPlayer
+            for _, v in pairs(player.Backpack:GetChildren()) do
+                if v.Name == "Punch" and player.Character and player.Character:FindFirstChild("Humanoid") then
+                    player.Character.Humanoid:EquipTool(v)
+                end
+            end
+            if player:FindFirstChild("muscleEvent") then
+                player.muscleEvent:FireServer("punch", "leftHand")
+                player.muscleEvent:FireServer("punch", "rightHand")
+            end
+        end
+
+        local requiredDurability = 10000000
+        getgenv().RockFarmRunning = true
+
+        task.spawn(function()
+            local player = game:GetService("Players").LocalPlayer
+
+            while getgenv().RockFarmRunning do
+                task.wait()
+                if player:FindFirstChild("Durability") and player.Durability.Value >= requiredDurability then
+                    for _, v in pairs(workspace.machinesFolder:GetDescendants()) do
+                        if v.Name == "neededDurability" and v.Value == requiredDurability then
+                            local rock = v.Parent and v.Parent:FindFirstChild("Rock")
+                            if rock and player.Character and player.Character:FindFirstChild("LeftHand") and player.Character:FindFirstChild("RightHand") then
+                                firetouchinterest(rock, player.Character.RightHand, 0)
+                                firetouchinterest(rock, player.Character.RightHand, 1)
+                                firetouchinterest(rock, player.Character.LeftHand, 0)
+                                firetouchinterest(rock, player.Character.LeftHand, 1)
+                                gettool()
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    else
+        getgenv().RockFarmRunning = false
+    end
+end)
+
 local Inventory = window:AddTab("Inventory")
 
 ---Eat All Boosters
