@@ -1565,7 +1565,7 @@ autoEquipToolsFolder:AddSwitch("Auto Punch", function(Value)
                             punch.Parent = character
                         end
                         if punch:FindFirstChild("attackTime") then
-                            punch.attackTime.Value = 0
+                            punch.attackTime.Value = 0.2
                         end
                     end
                 end
@@ -2543,7 +2543,3 @@ teleport:AddButton("Brawl Regular", function()
         Duration = 0
     })
 end)
-
-
-
-
