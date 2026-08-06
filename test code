@@ -1393,7 +1393,230 @@ local LocalPlayer = Players.LocalPlayer
 local AutoFarm = window:AddTab("Auto Farming")
 
 
-local rahhh = AutoFarm:AddFolder("Exercise")
+local autoEquipToolsFolder = AutoFarm:AddFolder("Tools")
+-- or whatever name you prefer
+
+autoEquipToolsFolder:AddButton("Gamepass AutoLift", function()
+    local gamepassFolder = game:GetService("ReplicatedStorage").gamepassIds
+    local player = game:GetService("Players").LocalPlayer
+   
+    if not player:FindFirstChild("ownedGamepasses") then
+        Instance.new("Folder", player).Name = "ownedGamepasses"
+    end
+   
+    for _, gamepass in pairs(gamepassFolder:GetChildren()) do
+        local value = Instance.new("IntValue")
+        value.Name = gamepass.Name
+        value.Value = gamepass.Value
+        value.Parent = player.ownedGamepasses
+    end
+    print("All gamepasses granted!")
+end)
+
+autoEquipToolsFolder:AddSwitch("Auto Weight", function(Value)
+    _G.AutoWeight = Value
+    if Value then
+        local weightTool = game.Players.LocalPlayer.Backpack:FindFirstChild("Weight")
+        if weightTool then
+            game.Players.LocalPlayer.Character.Humanoid:EquipTool(weightTool)
+        end
+    else
+        local character = game.Players.LocalPlayer.Character
+        local equipped = character and character:FindFirstChild("Weight")
+        if equipped then
+            equipped.Parent = game.Players.LocalPlayer.Backpack
+        end
+    end
+   
+    task.spawn(function()
+        while _G.AutoWeight do
+            if not _G.AutoWeight then break end
+
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if character and character:FindFirstChild("Humanoid") then
+                local tool = player.Backpack:FindFirstChild("Weight") or character:FindFirstChild("Weight")
+                if tool and tool.Parent == player.Backpack then
+                    character.Humanoid:EquipTool(tool)
+                end
+            end
+
+            player.muscleEvent:FireServer("rep")
+            task.wait(0.1)
+        end
+    end)
+end)
+
+autoEquipToolsFolder:AddSwitch("Auto Pushups", function(Value)
+    _G.AutoPushups = Value
+    if Value then
+        local tool = game.Players.LocalPlayer.Backpack:FindFirstChild("Pushups")
+        if tool then
+            game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
+        end
+    else
+        local character = game.Players.LocalPlayer.Character
+        local equipped = character and character:FindFirstChild("Pushups")
+        if equipped then
+            equipped.Parent = game.Players.LocalPlayer.Backpack
+        end
+    end
+   
+    task.spawn(function()
+        while _G.AutoPushups do
+            if not _G.AutoPushups then break end
+
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if character and character:FindFirstChild("Humanoid") then
+                local tool = player.Backpack:FindFirstChild("Pushups") or character:FindFirstChild("Pushups")
+                if tool and tool.Parent == player.Backpack then
+                    character.Humanoid:EquipTool(tool)
+                end
+            end
+
+            player.muscleEvent:FireServer("rep")
+            task.wait(0.1)
+        end
+    end)
+end)
+
+autoEquipToolsFolder:AddSwitch("Auto Handstands", function(Value)
+    _G.AutoHandstands = Value
+    if Value then
+        local tool = game.Players.LocalPlayer.Backpack:FindFirstChild("Handstands")
+        if tool then
+            game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
+        end
+    else
+        local character = game.Players.LocalPlayer.Character
+        local equipped = character and character:FindFirstChild("Handstands")
+        if equipped then
+            equipped.Parent = game.Players.LocalPlayer.Backpack
+        end
+    end
+   
+    task.spawn(function()
+        while _G.AutoHandstands do
+            if not _G.AutoHandstands then break end
+
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if character and character:FindFirstChild("Humanoid") then
+                local tool = player.Backpack:FindFirstChild("Handstands") or character:FindFirstChild("Handstands")
+                if tool and tool.Parent == player.Backpack then
+                    character.Humanoid:EquipTool(tool)
+                end
+            end
+
+            player.muscleEvent:FireServer("rep")
+            task.wait(0.1)
+        end
+    end)
+end)
+
+autoEquipToolsFolder:AddSwitch("Auto Situps", function(Value)
+    _G.AutoSitups = Value
+    if Value then
+        local tool = game.Players.LocalPlayer.Backpack:FindFirstChild("Situps")
+        if tool then
+            game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
+        end
+    else
+        local character = game.Players.LocalPlayer.Character
+        local equipped = character and character:FindFirstChild("Situps")
+        if equipped then
+            equipped.Parent = game.Players.LocalPlayer.Backpack
+        end
+    end
+   
+    task.spawn(function()
+        while _G.AutoSitups do
+            if not _G.AutoSitups then break end
+
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if character and character:FindFirstChild("Humanoid") then
+                local tool = player.Backpack:FindFirstChild("Situps") or character:FindFirstChild("Situps")
+                if tool and tool.Parent == player.Backpack then
+                    character.Humanoid:EquipTool(tool)
+                end
+            end
+
+            player.muscleEvent:FireServer("rep")
+            task.wait(0.1)
+        end
+    end)
+end)
+
+autoEquipToolsFolder:AddSwitch("Auto Punch", function(Value)
+    _G.fastHitActive = Value
+   
+    if Value then
+        -- Keep tool equipped + force attackTime
+        task.spawn(function()
+            while _G.fastHitActive do
+                if not _G.fastHitActive then break end
+                local player = game.Players.LocalPlayer
+                local character = player.Character
+                if character then
+                    local punch = player.Backpack:FindFirstChild("Punch") or character:FindFirstChild("Punch")
+                    if punch then
+                        if punch.Parent == player.Backpack then
+                            punch.Parent = character
+                        end
+                        if punch:FindFirstChild("attackTime") then
+                            punch.attackTime.Value = 0
+                        end
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+       
+        -- Main punch loop
+        task.spawn(function()
+            while _G.fastHitActive do
+                if not _G.fastHitActive then break end
+                local player = game.Players.LocalPlayer
+                player.muscleEvent:FireServer("punch", "rightHand")
+                player.muscleEvent:FireServer("punch", "leftHand")
+               
+                local character = player.Character
+                if character then
+                    local punchTool = character:FindFirstChild("Punch")
+                    if punchTool then
+                        punchTool:Activate()
+                    end
+                end
+                task.wait(0)
+            end
+        end)
+    else
+        -- Unequip on disable
+        local character = game.Players.LocalPlayer.Character
+        if character then
+            local equipped = character:FindFirstChild("Punch")
+            if equipped then
+                equipped.Parent = game.Players.LocalPlayer.Backpack
+            end
+        end
+    end
+end)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 local pumpingiron = AutoFarm:AddFolder("Gym")
 
