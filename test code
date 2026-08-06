@@ -1394,7 +1394,7 @@ local AutoFarm = window:AddTab("Auto Farming")
 
 
 local autoEquipToolsFolder = AutoFarm:AddFolder("Tools")
--- or whatever name you prefer
+
 
 autoEquipToolsFolder:AddButton("Gamepass AutoLift", function()
     local gamepassFolder = game:GetService("ReplicatedStorage").gamepassIds
@@ -1553,7 +1553,6 @@ autoEquipToolsFolder:AddSwitch("Auto Punch", function(Value)
     _G.fastHitActive = Value
    
     if Value then
-        -- Keep tool equipped + force attackTime
         task.spawn(function()
             while _G.fastHitActive do
                 if not _G.fastHitActive then break end
@@ -1574,7 +1573,6 @@ autoEquipToolsFolder:AddSwitch("Auto Punch", function(Value)
             end
         end)
        
-        -- Main punch loop
         task.spawn(function()
             while _G.fastHitActive do
                 if not _G.fastHitActive then break end
@@ -1593,7 +1591,6 @@ autoEquipToolsFolder:AddSwitch("Auto Punch", function(Value)
             end
         end)
     else
-        -- Unequip on disable
         local character = game.Players.LocalPlayer.Character
         if character then
             local equipped = character:FindFirstChild("Punch")
@@ -2387,9 +2384,9 @@ local miscTab = window:AddTab("Misc")
 
 
 
+local miscTab = miscTab:AddFolder("Optimisations")
 
-
-local teleport = miscTab:AddFolder("other")
+local teleport = miscTab:AddFolder("Teleports")
 
 teleport:AddButton("Spawn", function()
     local player = game.Players.LocalPlayer
@@ -2550,7 +2547,3 @@ end)
 
 
 
-
-
-
-local miscTab = miscTab:AddFolder("Optimisations")
