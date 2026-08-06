@@ -1749,7 +1749,7 @@ rockington2:AddSwitch("Inferno Rock", function(state)
         end
 
         pcall(function()
-            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 2)
         end)
 
         stopAutoPunch()
@@ -1926,7 +1926,7 @@ rockington2:AddSwitch("Muscle King Rock", function(state)
         end
 
         pcall(function()
-            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 2)
         end)
 
         stopAutoPunch()
@@ -2099,7 +2099,7 @@ rockington2:AddSwitch("Legends Rock", function(state)
         end
 
         pcall(function()
-            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 2)
         end)
 
         stopAutoPunch()
@@ -2273,7 +2273,7 @@ rockington2:AddSwitch("Jungle Rock", function(state)
         end
 
         pcall(function()
-            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 2)
         end)
 
         stopAutoPunch()
