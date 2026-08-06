@@ -1824,7 +1824,7 @@ rockington2:AddSwitch("Red Rock", function(state)
         end
 
         pcall(function()
-            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 2)
         end)
 
         stopAutoPunch()
@@ -2001,7 +2001,7 @@ rockington2:AddSwitch("Green Rock", function(state)
         end
 
         pcall(function()
-            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 2)
         end)
 
         stopAutoPunch()
@@ -2181,7 +2181,7 @@ rockington2:AddSwitch("White Rock", function(state)
         end
 
         pcall(function()
-            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 2)
         end)
 
         stopAutoPunch()
@@ -2363,7 +2363,7 @@ rockington2:AddSwitch("Orange Rock", function(state)
         end
 
         pcall(function()
-            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 2)
         end)
 
         stopAutoPunch()
