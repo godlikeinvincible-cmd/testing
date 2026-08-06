@@ -1563,7 +1563,85 @@ autoEquipToolsFolder:AddSwitch("Auto Punch", function(Value)
 end)
 
 
-local pumpingiron = AutoFarm:AddFolder("Gym")
+local rebirthsFolder = AutoFarm:AddFolder("Rebirths")
+
+rebirthsFolder:AddTextBox("Rebirth Target", function(text)
+    local newValue = tonumber(text)
+    if newValue and newValue > 0 then
+        targetRebirthValue = newValue
+    end
+end)
+
+local targetSwitch = rebirthsFolder:AddSwitch("Auto Rebirth Target", function(bool)
+    _G.targetRebirthActive = bool
+   
+    if bool then
+        if _G.infiniteRebirthActive and infiniteSwitch then
+            infiniteSwitch:Set(false)
+            _G.infiniteRebirthActive = false
+        end
+       
+        spawn(function()
+            while _G.targetRebirthActive do
+                local currentRebirths = LocalPlayer.leaderstats.Rebirths.Value
+               
+                if currentRebirths >= targetRebirthValue then
+                    targetSwitch:Set(false)
+                    _G.targetRebirthActive = false
+                    break
+                end
+               
+                game:GetService("ReplicatedStorage").rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+                task.wait(0.15)
+            end
+        end)
+    end
+end)
+
+infiniteSwitch = rebirthsFolder:AddSwitch("Auto Rebirth (Infinite)", function(bool)
+    _G.infiniteRebirthActive = bool
+   
+    if bool then
+        -- Turn off target rebirth if active
+        if _G.targetRebirthActive and targetSwitch then
+            targetSwitch:Set(false)
+            _G.targetRebirthActive = false
+        end
+       
+        spawn(function()
+            while _G.infiniteRebirthActive do
+                game:GetService("ReplicatedStorage").rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+                task.wait(0.15)
+            end
+        end)
+    end
+end)
+
+rebirthsFolder:AddSwitch("Auto Set Size 1", function(bool)
+    _G.autoSizeActive = bool
+    if bool then
+        spawn(function()
+            while _G.autoSizeActive do
+                game:GetService("ReplicatedStorage").rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
+                task.wait()
+            end
+        end)
+    end
+end)
+
+rebirthsFolder:AddSwitch("Auto Teleport to King", function(bool)
+    _G.teleportActive = bool
+    if bool then
+        spawn(function()
+            while _G.teleportActive do
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-8646, 17, -5738)
+                end
+                task.wait(2)
+            end
+        end)
+    end
+end)
 
 
 local rockington = AutoFarm:AddFolder("Rock V1")
@@ -1584,7 +1662,7 @@ Label.TextSize = 18
 
 
 
-local targetCFrame = CFrame.new( -7227.2124, 4.22266006, -1268.93872, -0.351789951, -1.93498781e-08, 0.936078966, 1.47858668e-08, 1, 2.62279123e-08, -0.936078966, 2.30674555e-08, -0.351789951)
+local targetCFrame = CFrame.new(-7623.2041, 0.895177484, 3006.69409, 0.990648508, 8.82210952e-06, -0.136438847, -1.19864681e-05, 1, -2.2370954e-05, 0.136438847, 2.37971726e-05, 0.990648508)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -1749,7 +1827,7 @@ rockington2:AddSwitch("Inferno Rock", function(state)
         end
 
         pcall(function()
-            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 2)
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
         end)
 
         stopAutoPunch()
@@ -1926,7 +2004,7 @@ rockington2:AddSwitch("Muscle King Rock", function(state)
         end
 
         pcall(function()
-            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 2)
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
         end)
 
         stopAutoPunch()
@@ -2099,7 +2177,7 @@ rockington2:AddSwitch("Legends Rock", function(state)
         end
 
         pcall(function()
-            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 2)
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
         end)
 
         stopAutoPunch()
@@ -2107,7 +2185,7 @@ rockington2:AddSwitch("Legends Rock", function(state)
 end)
 
 
-local targetCFrame = CFrame.new(-7623.2041, 0.895177484, 3006.69409, 0.990648508, 8.82210952e-06, -0.136438847, -1.19864681e-05, 1, -2.2370954e-05, 0.136438847, 2.37971726e-05, 0.990648508)
+local targetCFrame = CFrame.new(-7227.2124, 4.22266006, -1268.93872, -0.351789951, -1.93498781e-08, 0.936078966, 1.47858668e-08, 1, 2.62279123e-08, -0.936078966, 2.30674555e-08, -0.351789951)
 
 
 local Players = game:GetService("Players")
@@ -2273,7 +2351,7 @@ rockington2:AddSwitch("Jungle Rock", function(state)
         end
 
         pcall(function()
-            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 2)
+            ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
         end)
 
         stopAutoPunch()
