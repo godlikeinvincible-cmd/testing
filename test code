@@ -2828,15 +2828,4 @@ teleport:AddButton("Brawl Desert", function()
     })
 end)
 
-teleport:AddButton("Brawl Regular", function()
-    local player = game.Players.LocalPlayer
-    local character = player.Character or player.CharacterAdded:Wait()
-    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-    humanoidRootPart.CFrame = CFrame.new(-1849, 20, -6335)
-    
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Teletransporte",
-        Text = "Teleported to Brawl Regular",
-        Duration = 0
-    })
-end)
+teleport:AddButton("Brawl R
