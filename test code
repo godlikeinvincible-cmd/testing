@@ -1662,7 +1662,7 @@ Label.TextSize = 18
 
 
 
-local targetCFrame = CFrame.new(-7623.2041, 0.895177484, 3006.69409, 0.990648508, 8.82210952e-06, -0.136438847, -1.19864681e-05, 1, -2.2370954e-05, 0.136438847, 2.37971726e-05, 0.990648508)
+local targetCFrame = CFrame.new(-7227.2124, 4.22266006, -1268.93872, -0.351789951, -1.93498781e-08, 0.936078966, 1.47858668e-08, 1, 2.62279123e-08, -0.936078966, 2.30674555e-08, -0.351789951)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -2185,7 +2185,7 @@ rockington2:AddSwitch("Legends Rock", function(state)
 end)
 
 
-local targetCFrame = CFrame.new(-7227.2124, 4.22266006, -1268.93872, -0.351789951, -1.93498781e-08, 0.936078966, 1.47858668e-08, 1, 2.62279123e-08, -0.936078966, 2.30674555e-08, -0.351789951)
+local targetCFrame = CFrame.new(-7623.2041, 0.895177484, 3006.69409, 0.990648508, 8.82210952e-06, -0.136438847, -1.19864681e-05, 1, -2.2370954e-05, 0.136438847, 2.37971726e-05, 0.990648508)
 
 
 local Players = game:GetService("Players")
