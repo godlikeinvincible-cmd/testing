@@ -2674,9 +2674,317 @@ local Inventory = window:AddTab("Inventory")
 ---Gift Shakes
 ---Gift Eggs
 
-local PlayerInfo = window:AddTab("Player Info")
----Stuff like account age/Birthdates etc
----Player Stats
+
+
+local SpecsTab = window:AddTab("Player Info")
+local playerToInspect = nil
+local emojiMap = {
+    ["Time"] = utf8.char(0x1F55B),
+    ["Stats"] = utf8.char(0x1F4CA),
+    ["Strength"] = utf8.char(0x1F4AA),
+    ["Rebirths"] = utf8.char(0x1F504),
+    ["Durability"] = utf8.char(0x1F6E1),
+    ["Kills"] = utf8.char(0x1F480),
+    ["Agility"] = utf8.char(0x1F3C3),
+    ["Evil Karma"] = utf8.char(0x1F608),
+    ["Good Karma"] = utf8.char(0x1F607),
+    ["Brawls"] = utf8.char(0x1F94A)
+}
+local statDefinitions = {
+    { name = "Strength", statName = "Strength" },
+    { name = "Rebirths", statName = "Rebirths" },
+    { name = "Durability", statName = "Durability" },
+    { name = "Agility", statName = "Agility" },
+    { name = "Kills", statName = "Kills" },
+    { name = "Evil Karma", statName = "evilKarma" },
+    { name = "Good Karma", statName = "goodKarma" },
+    { name = "Brawls", statName = "Brawls" }
+}
+local function getCurrentPlayers()
+    local playersList = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        table.insert(playersList, p)
+    end
+    return playersList
+end
+local specdropdown = SpecsTab:AddDropdown("Choose Player", function(text)
+    for _, player in ipairs(getCurrentPlayers()) do
+        local optionText = player.DisplayName .. " | " .. player.Name
+        if text == optionText then
+            playerToInspect = player
+            updateStatLabels(playerToInspect)
+            break
+        end
+    end
+end)
+for _, player in ipairs(getCurrentPlayers()) do
+    specdropdown:Add(player.DisplayName .. " | " .. player.Name)
+end
+Players.PlayerAdded:Connect(function(player)
+    specdropdown:Add(player.DisplayName .. " | " .. player.Name)
+end)
+Players.PlayerRemoving:Connect(function(player)
+    specdropdown:Clear()
+    for _, p in ipairs(getCurrentPlayers()) do
+        specdropdown:Add(p.DisplayName .. " | " .. p.Name)
+    end
+end)
+local playerNameLabel = SpecsTab:AddLabel("Name: N/A")
+playerNameLabel.TextSize = 20
+playerNameLabel.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+local playerUsernameLabel = SpecsTab:AddLabel("Username: N/A")
+playerUsernameLabel.TextSize = 20
+playerUsernameLabel.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+local statLabels = {}
+for _, info in ipairs(statDefinitions) do
+    local label = SpecsTab:AddLabel(emojiMap[info.name] .. " " .. info.name .. ": 0 (0)")
+    label.TextSize = 20
+    label.FontFace = Font.new(
+        "rbxasset://fonts/families/PermanentMarker.json",
+        Enum.FontWeight.Regular,
+        Enum.FontStyle.Normal
+    )
+    statLabels[info.name] = label
+end
+local function formatNumber(n)
+    if n >= 1e15 then
+        return string.format("%.1fqa", n/1e15)
+    elseif n >= 1e12 then
+        return string.format("%.1ft", n/1e12)
+    elseif n >= 1e9 then
+        return string.format("%.1fb", n/1e9)
+    elseif n >= 1e6 then
+        return string.format("%.1fm", n/1e6)
+    elseif n >= 1e3 then
+        return string.format("%.1fk", n/1e3)
+    else
+        return tostring(n)
+    end
+end
+local function formatWithCommas(n)
+    local formatted = tostring(math.floor(n))
+    while true do
+        formatted, k = formatted:gsub("^(-?%d+)(%d%d%d)", '%1,%2')
+        if k == 0 then break end
+    end
+    return formatted
+end
+local function updateStatLabels(targetPlayer)
+    if not targetPlayer then return end
+    playerNameLabel.Text = "Name: " .. targetPlayer.DisplayName
+    playerUsernameLabel.Text = "Username: " .. targetPlayer.Name
+    local leaderstats = targetPlayer:FindFirstChild("leaderstats")
+    if not leaderstats then return end
+    for _, info in ipairs(statDefinitions) do
+        local statObject
+        if leaderstats:FindFirstChild(info.statName) then
+            statObject = leaderstats:FindFirstChild(info.statName)
+        elseif targetPlayer:FindFirstChild(info.statName) then
+            statObject = targetPlayer:FindFirstChild(info.statName)
+        end
+        if statObject then
+            local value = statObject.Value
+            local emoji = emojiMap[info.name] or ""
+            statLabels[info.name].Text = string.format(
+                "%s %s: %s (%s)",
+                emoji,
+                info.name,
+                formatNumber(value),
+                formatWithCommas(value)
+            )
+        else
+            statLabels[info.name].Text = emojiMap[info.name] .. " " .. info.name .. ": 0 (0)"
+        end
+    end
+end
+task.spawn(function()
+    while true do
+        if playerToInspect then
+            updateStatLabels(playerToInspect)
+        end
+        task.wait(0.2)
+    end
+end)
+local titleLabel = SpecsTab:AddLabel(" ")
+titleLabel.TextSize = 20
+titleLabel.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+local titleLabel = SpecsTab:AddLabel("_____________________________")
+titleLabel.TextSize = 20
+titleLabel.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+local titleLabel = SpecsTab:AddLabel(" ")
+titleLabel.TextSize = 20
+titleLabel.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local Player = game.Players.LocalPlayer
+
+local function formatNumber(n)
+    if not n or n < 0 then return "0" end
+    if n >= 1e9 then
+        return string.format("%.1fB", n / 1e9)
+    elseif n >= 1e6 then
+        return string.format("%.1fM", n / 1e6)
+    elseif n >= 1e3 then
+        return string.format("%.1fK", n / 1e3)
+    else
+        return tostring(math.floor(n))
+    end
+end
+local function formatWithCommas(n)
+    if not n then return "0" end
+    n = tostring(math.floor(n))
+    local formatted = n:reverse():gsub("(%d%d%d)", "%1,"):reverse()
+    return formatted:gsub("^,", "")
+end
+
+local advancedStatsHeader = SpecsTab:AddLabel("Advanced Stats:")
+advancedStatsHeader.TextSize = 24
+advancedStatsHeader.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+local enemyHealthLabel = SpecsTab:AddLabel("Enemy Health: N/A")
+enemyHealthLabel.TextSize = 20
+enemyHealthLabel.TextColor3 = Color3.fromRGB(0, 140, 255)
+enemyHealthLabel.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+local playerDamageLabel = SpecsTab:AddLabel("Your Damage: N/A")
+playerDamageLabel.TextSize = 20
+playerDamageLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+playerDamageLabel.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+local hitsToKillLabel = SpecsTab:AddLabel("Hits to Kill: N/A")
+hitsToKillLabel.TextSize = 20
+hitsToKillLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+hitsToKillLabel.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+local function calculateEnemyHealth(targetPlayer)
+    if not targetPlayer then return 0 end
+    local baseDura = 0
+    local durabilityStat = targetPlayer:FindFirstChild("Durability")
+        or (targetPlayer:FindFirstChild("leaderstats") and targetPlayer.leaderstats:FindFirstChild("Durability"))
+    if durabilityStat then
+        baseDura = durabilityStat.Value
+    end
+    local totalMultiplier = 1
+
+    local ultFolder = targetPlayer:FindFirstChild("ultimatesFolder")
+    if ultFolder then
+        local infernalHealth = ultFolder:FindFirstChild("Infernal Health")
+        if infernalHealth then
+            local upgrades = infernalHealth.Value or 0
+            totalMultiplier = totalMultiplier + 0.15 * upgrades
+        end
+    end
+
+    local equippedPetsFolder = targetPlayer:FindFirstChild("equippedPets")
+    if equippedPetsFolder then
+        local petBonus = 0
+        for _, petValue in ipairs(equippedPetsFolder:GetChildren()) do
+            if petValue:IsA("ObjectValue") and petValue.Value then
+                local petNameLower = string.lower(petValue.Value.Name)
+                if petNameLower:match("mighty") and petNameLower:match("monster") then
+                    petBonus = petBonus + 0.5
+                end
+            end
+        end
+        totalMultiplier = totalMultiplier + petBonus
+    end
+    return baseDura * totalMultiplier
+end
+local function calculateLocalPlayerDamage()
+    local leaderstats = Player:FindFirstChild("leaderstats")
+    local strengthStat = leaderstats and leaderstats:FindFirstChild("Strength")
+    if not strengthStat then return 0 end
+    local baseDamage = strengthStat.Value * 0.0667
+    local totalMultiplier = 1
+    local ultFolder = Player:FindFirstChild("ultimatesFolder")
+    if ultFolder then
+        local demonDamage = ultFolder:FindFirstChild("Demon Damage")
+        if demonDamage then
+            local upgrades = demonDamage.Value or 0
+            totalMultiplier = totalMultiplier + 0.1 * upgrades
+        end
+    end
+    local equippedPetsFolder = Player:FindFirstChild("equippedPets")
+    if equippedPetsFolder then
+        local petBonus = 0
+        for _, petValue in ipairs(equippedPetsFolder:GetChildren()) do
+            if petValue:IsA("ObjectValue") and petValue.Value then
+                local petNameLower = string.lower(petValue.Value.Name)
+                if petNameLower:match("wild") and petNameLower:match("wizard") then
+                    petBonus = petBonus + 0.5
+                end
+            end
+        end
+        totalMultiplier = totalMultiplier + petBonus
+    end
+    return baseDamage * totalMultiplier
+end
+local function calculateHitsToKill(health, damage)
+    if damage <= 0 then return "∞" end
+    local hits = math.ceil(health / damage)
+    if hits > 100 then
+        return "∞"
+    elseif hits < 1 then
+        return 1
+    else
+        return hits
+    end
+end
+local function updateAdvancedStats(targetPlayer)
+    if not targetPlayer then
+        enemyHealthLabel.Text = "Enemy Health: N/A"
+        playerDamageLabel.Text = "Your Damage: N/A"
+        hitsToKillLabel.Text = "Hits to Kill: N/A"
+        return
+    end
+    local enemyHealth = calculateEnemyHealth(targetPlayer)
+    local playerDamage = calculateLocalPlayerDamage()
+    local hitsToKill = calculateHitsToKill(enemyHealth, playerDamage)
+    enemyHealthLabel.Text = string.format("Enemy Health: %s (%s)", formatNumber(enemyHealth), formatWithCommas(enemyHealth))
+    playerDamageLabel.Text = string.format("Your Damage: %s (%s)", formatNumber(playerDamage), formatWithCommas(playerDamage))
+    hitsToKillLabel.Text = string.format("Hits to Kill: %s", tostring(hitsToKill))
+end
+task.spawn(function()
+    while true do
+        updateAdvancedStats(playerToInspect) 
+        task.wait(0.1)
+    end
+end)
 
 local miscTab = window:AddTab("Misc")
 
@@ -2690,6 +2998,12 @@ teleport:AddButton("Spawn", function()
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
     humanoidRootPart.CFrame = CFrame.new(2, 8, 115)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Teletransporte",
+        Text = "Teleported to Spawn",
+        Duration = 0
+    })
 end)
 
 teleport:AddButton("Secret Area", function()
@@ -2697,6 +3011,12 @@ teleport:AddButton("Secret Area", function()
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
     humanoidRootPart.CFrame = CFrame.new(1947, 2, 6191)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Teletransporte",
+        Text = "Teleported to Secret Area",
+        Duration = 0
+    })
 end)
 
 teleport:AddButton("Tiny Island", function()
@@ -2704,13 +3024,25 @@ teleport:AddButton("Tiny Island", function()
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
     humanoidRootPart.CFrame = CFrame.new(-34, 7, 1903)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Teletransporte",
+        Text = "Teleported to Tiny Island",
+        Duration = 0
+    })
 end)
 
 teleport:AddButton("Frozen Island", function()
     local player = game.Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-    humanoidRootPart.CFrame = CFrame.new(-2600.00244, 3.67686558, -403.884369, 0.0873617008, 1.0482899e-09, 0.99617666, 3.07204253e-08, 1, -3.7464023e-09, -0.99617666, 3.09302628e-08, 0.0873617008)
+    humanoidRootPart.CFrame = CFrame.new(- 2600.00244, 3.67686558, - 403.884369, 0.0873617008, 1.0482899e-09, 0.99617666, 3.07204253e-08, 1, - 3.7464023e-09, - 0.99617666, 3.09302628e-08, 0.0873617008)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Teletransporte",
+        Text = "Teleported to Frozen Island",
+        Duration = 0
+    })
 end)
 
 teleport:AddButton("Mythical Island", function()
@@ -2718,6 +3050,12 @@ teleport:AddButton("Mythical Island", function()
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
     humanoidRootPart.CFrame = CFrame.new(2255, 7, 1071)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Teletransporte",
+        Text = "Teleported to Mythical Island",
+        Duration = 0
+    })
 end)
 
 teleport:AddButton("lava Island", function()
@@ -2725,6 +3063,12 @@ teleport:AddButton("lava Island", function()
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
     humanoidRootPart.CFrame = CFrame.new(-6768, 7, -1287)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Teletransporte",
+        Text = "Teleported to ***** Island",
+        Duration = 0
+    })
 end)
 
 teleport:AddButton("Legend Island", function()
@@ -2732,6 +3076,12 @@ teleport:AddButton("Legend Island", function()
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
     humanoidRootPart.CFrame = CFrame.new(4604, 991, -3887)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Teletransporte",
+        Text = "Teleported to Legend Island",
+        Duration = 0
+    })
 end)
 
 teleport:AddButton("Muscle King Island", function()
@@ -2739,6 +3089,12 @@ teleport:AddButton("Muscle King Island", function()
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
     humanoidRootPart.CFrame = CFrame.new(-8646, 17, -5738)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Teletransporte",
+        Text = "Teleported to Muscle King",
+        Duration = 0
+    })
 end)
 
 teleport:AddButton("Jungle Island", function()
@@ -2746,6 +3102,12 @@ teleport:AddButton("Jungle Island", function()
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
     humanoidRootPart.CFrame = CFrame.new(-8659, 6, 2384)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Teletransporte",
+        Text = "Teleported to Jungle Island",
+        Duration = 0
+    })
 end)
 
 teleport:AddButton("Brawl Lava", function()
@@ -2753,6 +3115,12 @@ teleport:AddButton("Brawl Lava", function()
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
     humanoidRootPart.CFrame = CFrame.new(4471, 119, -8836)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Teletransporte",
+        Text = "Teleported to Brawl Lava",
+        Duration = 0
+    })
 end)
 
 teleport:AddButton("Brawl Desert", function()
@@ -2760,6 +3128,12 @@ teleport:AddButton("Brawl Desert", function()
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
     humanoidRootPart.CFrame = CFrame.new(960, 17, -7398)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Teletransporte",
+        Text = "Teleported to Brawl Desert",
+        Duration = 0
+    })
 end)
 
 teleport:AddButton("Brawl Regular", function()
@@ -2767,6 +3141,12 @@ teleport:AddButton("Brawl Regular", function()
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
     humanoidRootPart.CFrame = CFrame.new(-1849, 20, -6335)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Teletransporte",
+        Text = "Teleported to Brawl Regular",
+        Duration = 0
+    })
 end)
 
 
