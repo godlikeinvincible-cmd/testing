@@ -2383,9 +2383,6 @@ local miscTab = window:AddTab("Misc")
 
 
 
-
-local miscTab = miscTab:AddFolder("Optimisations")
-
 local teleport = miscTab:AddFolder("Teleports")
 
 teleport:AddButton("Spawn", function()
