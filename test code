@@ -2668,126 +2668,14 @@ end)
 
 local Inventory = window:AddTab("Inventory")
 
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-local itemList = {
-    "Tropical Shake",
-    "Energy Shake",
-    "Protein Bar",
-    "TOUGH Bar",
-    "Protein Shake",
-    "ULTRA Shake",
-    "Energy Bar"
-}
-
-local function formatEventName(itemName)
-    local parts = {}
-    for word in itemName:gmatch("%S+") do
-        table.insert(parts, word:lower())
-    end
-    for i = 2, #parts do
-        parts[i] = parts[i]:sub(1,1):upper() .. parts[i]:sub(2)
-    end
-    return table.concat(parts)
-end
-
-local function activateRandomItems(count)
-    local shuffledItems = {}
-    for _, item in ipairs(itemList) do
-        table.insert(shuffledItems, item)
-    end
-    for i = #shuffledItems, 2, -1 do
-        local j = math.random(i)
-        shuffledItems[i], shuffledItems[j] = shuffledItems[j], shuffledItems[i]
-    end
-    for i = 1, math.min(count, #shuffledItems) do
-        local tool = player.Character and player.Character:FindFirstChild(shuffledItems[i]) or player.Backpack:FindFirstChild(shuffledItems[i])
-        if tool then
-            local eventName = formatEventName(shuffledItems[i])
-            if player:FindFirstChild("muscleEvent") then
-                player.muscleEvent:FireServer(eventName, tool)
-            end
-        end
-    end
-end
-
-local running = false
-
-task.spawn(function()
-    while true do
-        if running then
-            activateRandomItems(4)
-            task.wait(0.5)
-        else
-            task.wait(0.5)
-        end
-    end
-end)
-
-Inventory:AddSwitch("Eat All Boosters", function(state)
-    running = state
-    if state then
-        activateRandomItems(4)
-    end
-end)
-
-local Label = Inventory:AddLabel("Auras:")
-Label.TextSize = 20
+Inventory:AddLabel("I will do this section later")
 Label.FontFace = Font.new(
     "rbxasset://fonts/families/PermanentMarker.json",
     Enum.FontWeight.Regular,
     Enum.FontStyle.Normal
 )
 
-local selectedAura = "Entropic Blast" 
-local auraDropdown = Inventory:AddDropdown("Select Aura", function(text)
-    selectedAura = text
-end)
-
-auraDropdown:Add("Entropic Blast")
-auraDropdown:Add("Muscle King")
-auraDropdown:Add("Astral Electro")
-auraDropdown:Add("Azure Tundra")
-auraDropdown:Add("Blue Aura")
-auraDropdown:Add("Dark Electro")
-auraDropdown:Add("Dark Lightning")
-auraDropdown:Add("Dark Storm")
-auraDropdown:Add("Electro")
-auraDropdown:Add("Enchanted Mirage")
-auraDropdown:Add("Eternal Megastrike")
-auraDropdown:Add("Grand Supernova")
-auraDropdown:Add("Green Aura")
-auraDropdown:Add("Inferno")
-auraDropdown:Add("Lightning")
-auraDropdown:Add("Power Lightning")
-auraDropdown:Add("Purple Aura")
-auraDropdown:Add("Purple Nova")
-auraDropdown:Add("Red Aura")
-auraDropdown:Add("Supernova")
-auraDropdown:Add("Ultra Inferno")
-auraDropdown:Add("Ultra Mirage")
-auraDropdown:Add("Unstable Mirage")
-auraDropdown:Add("Yellow Aura")
-
-Inventory:AddSwitch("Buy Aura", function(bool)
-    _G.AutoHatchAura = bool
-    
-    if bool then
-        spawn(function()
-            while _G.AutoHatchAura and selectedAura \~= "" do
-                local auraToOpen = ReplicatedStorage:FindFirstChild("cPetShopFolder") and ReplicatedStorage.cPetShopFolder:FindFirstChild(selectedAura)
-                if auraToOpen then
-                    ReplicatedStorage.cPetShopRemote:InvokeServer(auraToOpen)
-                end
-                task.wait(0.1)
-            end
-        end)
-    end
-end)
----Gift Shakes
----Gift Eggs
+Label.TextSize = 18
 
 local PlayerInfo = window:AddTab("Player Info")
 ---Stuff like account age/Birthdates etc
