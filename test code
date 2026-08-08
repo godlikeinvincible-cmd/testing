@@ -355,6 +355,69 @@ end)
 
 freezeSwitch:Set(true)
 
+local Label = mainTab:AddLabel("")
+
+Label.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+Label.TextSize = 2
+
+local Label = mainTab:AddLabel("More Features")
+
+Label.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+Label.TextSize = 20
+
+local Label = mainTab:AddLabel("")
+
+Label.FontFace = Font.new(
+    "rbxasset://fonts/families/PermanentMarker.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+Label.TextSize = 2
+
+
+
+
+
+local timeDropdown = mainTab:AddDropdown("Time Set", function(text)
+    local times = {
+        ["Midnight"] = 0,
+        ["Early Morning"] = 6,
+        ["Morning"] = 9,
+        ["Noon"] = 12,
+        ["Afternoon"] = 15,
+        ["Evening"] = 18,
+        ["Night"] = 21
+    }
+
+    if times[text] then
+        game.Lighting.ClockTime = times[text]
+    end
+end)
+
+-- Add the options
+timeDropdown:Add("Midnight")
+timeDropdown:Add("Early Morning")
+timeDropdown:Add("Morning")
+timeDropdown:Add("Noon")
+timeDropdown:Add("Afternoon")
+timeDropdown:Add("Evening")
+timeDropdown:Add("Night")
+
+
+
+
+
 
 local Killer = window:AddTab("Killer")
 
@@ -2666,18 +2729,96 @@ rockington:AddSwitch("Jungle Rock", function(state)
     end
 end)
 
-local Inventory = window:AddTab("Inventory")
 
-Inventory:AddLabel("I will do this section later")
-Label.FontFace = Font.new(
-    "rbxasset://fonts/families/PermanentMarker.json",
-    Enum.FontWeight.Regular,
-    Enum.FontStyle.Normal
-)
 
-Label.TextSize = 18
 
-local SpecsTab = window:AddTab(" Stats ")
+
+
+
+
+
+local inventoryTab = window:AddTab("Inventory")
+
+local function addLabel(text, textSize)
+    local label = inventoryTab:AddLabel(text)
+
+    label.FontFace = Font.new(
+        "rbxasset://fonts/families/PermanentMarker.json",
+        Enum.FontWeight.Regular,
+        Enum.FontStyle.Normal
+    )
+
+    label.TextSize = textSize
+
+    return label
+end
+
+addLabel(" ", 2)
+addLabel("Eating Shit", 20)
+addLabel(" ", 2)
+
+
+inventoryTab:AddSwitch("Eat All Eggs", function(state)
+    getgenv().EatAllEggs = state
+    if state then
+        task.spawn(function()
+            local player = game.Players.LocalPlayer
+            local muscleEvent = player:WaitForChild("muscleEvent")
+            while getgenv().EatAllEggs do
+                for _, tool in pairs(player.Backpack:GetChildren()) do
+                    if tool:IsA("Tool") and tool.Name == "Protein Egg" then
+                        muscleEvent:FireServer("proteinEgg", tool)
+                    end
+                end
+                if player.Character then
+                    for _, tool in pairs(player.Character:GetChildren()) do
+                        if tool:IsA("Tool") and tool.Name == "Protein Egg" then
+                            muscleEvent:FireServer("proteinEgg", tool)
+                        end
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+
+
+
+
+inventoryTab:AddSwitch("Eat All Shakes", function(state)
+    getgenv().EatAllTropicalShakes = state
+    if state then
+        task.spawn(function()
+            local player = game.Players.LocalPlayer
+            local muscleEvent = player:WaitForChild("muscleEvent")
+            while getgenv().EatAllTropicalShakes do
+                for _, tool in pairs(player.Backpack:GetChildren()) do
+                    if tool:IsA("Tool") and tool.Name == "Tropical Shake" then
+                        muscleEvent:FireServer("tropicalShake", tool)
+                    end
+                end
+
+                if player.Character then
+                    for _, tool in pairs(player.Character:GetChildren()) do
+                        if tool:IsA("Tool") and tool.Name == "Tropical Shake" then
+                            muscleEvent:FireServer("tropicalShake", tool)
+                        end
+                    end
+                end
+
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+
+
+
+
+local SpecsTab = window:AddTab("Player Info")
 local playerToInspect = nil
 local emojiMap = {
     ["Time"] = utf8.char(0x1F55B),
